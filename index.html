@@ -32,16 +32,9 @@
             padding: 24px;
         }
 
-        /* Keyframes de Animaciones */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(0, 92, 169, 0.2); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 92, 169, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 92, 169, 0); }
         }
 
         .animated {
@@ -122,7 +115,7 @@
         .summary-header::before { content: ''; width: 5px; height: 18px; background: var(--nestle-red); border-radius: 3px; }
 
         .motivo-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
-        
+
         .motivo-card {
             background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(255, 255, 255, 0.95);
             border-radius: 18px; padding: 20px; position: relative; overflow: hidden;
@@ -168,13 +161,12 @@
         th { position: sticky; top: 0; background: #eef5fc; color: var(--nestle-blue); padding: 14px; font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; border-bottom: 2px solid rgba(0, 92, 169, 0.15); z-index: 2; }
         td { padding: 11px 14px; border-bottom: 1px solid rgba(0, 92, 169, 0.06); color: var(--text-primary); transition: background 0.2s; }
         tr:hover td { background: rgba(0, 92, 169, 0.025); }
-        
+
         .badge { padding: 5px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; background: rgba(0, 92, 169, 0.1); color: var(--nestle-blue); display: inline-block; }
         .badge-impacto { background: rgba(227, 24, 55, 0.1); color: var(--nestle-red); font-weight: 800; }
         .badge-noviable { background: rgba(227, 24, 55, 0.15); color: #991b1b; font-weight: 800; }
         .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); font-weight: 600; font-size: 14px; }
 
-        /* PESTAÑA SOPORTE FOTOGRÁFICO */
         .photo-gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -221,7 +213,6 @@
         .photo-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
         .photo-step { font-size: 12px; color: var(--text-primary); line-height: 1.4; background: #f8fafc; padding: 10px; border-radius: 10px; border-left: 3px solid var(--nestle-gold); margin-top: 4px; }
 
-        /* Modal para ampliar imágenes */
         .modal {
             display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
@@ -258,8 +249,7 @@
 
     <!-- PESTAÑA 1: MORE -->
     <div id="tab-more" class="tab-content active animated">
-        
-        <!-- FILTROS TOTALMENTE SINCRONIZADOS -->
+
         <div class="glass-panel">
             <div class="filters-grid">
                 <div class="filter-group">
@@ -343,7 +333,6 @@
         </div>
     </div>
 
-    <!-- Modal para zoom de foto -->
     <div id="photoModal" class="modal" onclick="closeModal()">
         <span class="modal-close">&times;</span>
         <img class="modal-content" id="imgModal">
@@ -360,11 +349,10 @@
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         function getWeekOfMonth(dateObj) {
-            const day = dateObj.getDate();
-            if (day <= 7) return "Semana 1";
-            if (day <= 14) return "Semana 2";
-            if (day <= 21) return "Semana 3";
-            return "Semana 4";
+            const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
+            const weekNumber = Math.ceil(((d.getUTCDate() - 1) + yearStart.getUTCDay()) / 7);
+            return `Semana ${weekNumber}`;
         }
 
         function parseLocalDate(fechaStr) {
@@ -379,7 +367,7 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-            
+
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
         }
@@ -407,7 +395,6 @@
                 let rawImpacto = impactoKey ? row[impactoKey] : "";
                 let impactoVal = (rawImpacto && rawImpacto !== "NaT" && rawImpacto !== "None" && rawImpacto !== "nan") ? String(rawImpacto).trim() : "";
 
-                // UNIFICACIÓN DE LEADS Y FOCO
                 let rawMotivo = String(row["MOTIVO"] || row["Motivo"] || "-").trim();
                 let motivoUpper = rawMotivo.toUpperCase();
                 let motivoFinal = rawMotivo;
@@ -441,7 +428,6 @@
             const mesSel = document.getElementById('filter-mes').value;
             const semanaSel = document.getElementById('filter-semana').value;
 
-            // Filtrado de opciones en cascada
             let baseData = rawDataMore;
             if (mesSel) baseData = baseData.filter(r => r.Mes === mesSel);
 
@@ -451,12 +437,10 @@
             const motivos = [...new Set(baseData.map(r => r.Motivo).filter(Boolean))];
             const fechas = [...new Set(baseData.map(r => r.Fecha).filter(f => f && f !== "-"))].sort().reverse();
 
-            // Llenar MES si está vacío
             if (document.getElementById('filter-mes').options.length <= 1) {
                 document.getElementById('filter-mes').innerHTML = '<option value="">Todos los Meses</option>' + meses.map(m => `<option value="${m}">${m}</option>`).join('');
             }
 
-            // Actualizar Semanas dinámicamente según el mes seleccionado
             document.getElementById('filter-semana').innerHTML = '<option value="">Todas las Semanas</option>' + semanas.map(s => `<option value="${s}"${s === semanaSel ? ' selected' : ''}>${s}</option>`).join('');
             document.getElementById('filter-poc').innerHTML = '<option value="">Todos los POC</option>' + pocs.map(p => `<option value="${p}">${p}</option>`).join('');
             document.getElementById('filter-motivo').innerHTML = '<option value="">Todos los Motivos</option>' + motivos.map(m => `<option value="${m}">${m}</option>`).join('');
@@ -497,7 +481,6 @@
             const container = document.getElementById('motivo-cards-container');
             const totalMore = filteredDataMore.length;
 
-            // 1. Conteo por Motivo
             const motivoCounts = {};
             let noViablesCount = 0;
 
@@ -509,7 +492,6 @@
                 motivoCounts[r.Motivo] = (motivoCounts[r.Motivo] || 0) + 1;
             });
 
-            // Generar tarjetas de Motivos principales
             let htmlCards = Object.entries(motivoCounts).map(([motivo, count]) => `
                 <div class="motivo-card animated">
                     <div class="motivo-title">${motivo}</div>
@@ -518,7 +500,6 @@
                 </div>
             `).join('');
 
-            // 2. Tarjeta Especial NO VIABLES (PROSPECTO DISTRIBUCION + CIERRE)
             const pctNoViables = totalMore > 0 ? ((noViablesCount / totalMore) * 100).toFixed(1) : 0;
             htmlCards += `
                 <div class="motivo-card card-noviable animated">
@@ -528,7 +509,6 @@
                 </div>
             `;
 
-            // 3. Conteo de Cámara y Comercio Sincronizado
             let totalEmpresasCamara = 0;
             let conteoImpactoCamara = 0;
 
@@ -556,7 +536,6 @@
 
             const pctImpactoCamara = totalEmpresasCamara > 0 ? ((conteoImpactoCamara / totalEmpresasCamara) * 100).toFixed(1) : 0;
 
-            // Tarjetas C&C
             htmlCards += `
                 <div class="motivo-card card-camara animated">
                     <div class="motivo-title">🏢 TOTAL EMPRESAS CÁMARA Y COMERCIO</div>
@@ -605,7 +584,7 @@
 
         function renderPhotoGallery() {
             const container = document.getElementById('photo-gallery-container');
-            
+
             if (filteredDataMore.length === 0) {
                 container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">No hay fotos registradas para los filtros seleccionados.</div>';
                 return;
